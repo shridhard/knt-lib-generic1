@@ -44,7 +44,6 @@ dependency-reduced-pom.xml
 dump.rdb
 HELP.md
 interpolated*.xml
-lib/
 MANIFEST.MF
 manifest.yml
 out
