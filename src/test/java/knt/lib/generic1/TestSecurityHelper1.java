@@ -181,8 +181,8 @@ public class TestSecurityHelper1 {
         byte[] privateKeyBytes;
         try {
             // encrypting the data
-            String cipherText = securityHelper1.codeEn(content);
-            System.out.println(METHOD_NAME + "cipherText: " + cipherText);
+            byte[] cipherText = securityHelper1.codeEn(content);
+            System.out.println(METHOD_NAME + "cipherText: " + new String(cipherText, "UTF8"));
 
             privateKeyBytes = keyPair.getPrivate().getEncoded();
             PrivateKey privateKey = securityHelper1.deSerialize(algorithm, privateKeyBytes, null);
@@ -192,9 +192,8 @@ public class TestSecurityHelper1 {
             cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             // Initializing the same cipher for decryption
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            byte[] cipherTextBytes = cipherText.getBytes(StandardCharsets.UTF_8);
             // Decrypting the textsdfadsfdsafadsf
-            byte[] decipheredText = cipher.doFinal(cipherTextBytes);
+            byte[] decipheredText = cipher.doFinal(cipherText);
             String outputText4Check = new String(decipheredText, StandardCharsets.UTF_8);
             System.out.println(METHOD_NAME + "outputText4CheckoutputText4Check: " + outputText4Check);
             System.out.println(METHOD_NAME + "securityHelper1.getContent(): " + securityHelper1.getContent());
