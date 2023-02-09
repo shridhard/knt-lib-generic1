@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 class TestStringPadderImpl {
 
-    private final StringPadderImpl stringPadder = new StringPadderImpl();
+    private final StringPadder stringPadder = StringPadderFactory.createStringPadder();
 
     @Test
 
@@ -52,7 +52,7 @@ class TestStringPadderImpl {
     @Test
 
     void padLeftWithInvalidTotalLength() {
-    assertThat(stringPadder.padLeft("thegreatapi.com", 3))
+        assertThat(stringPadder.padLeft("thegreatapi.com", 3))
 
                 .isEqualTo("thegreatapi.com");
 
