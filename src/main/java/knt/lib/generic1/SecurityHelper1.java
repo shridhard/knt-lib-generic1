@@ -6,7 +6,6 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.Signature;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -18,9 +17,9 @@ import javax.crypto.Cipher;
 public class SecurityHelper1 {
 
     private static String PASSCODESHA2048 = "$W%Ld0os$3";
-    private static final int KEYPAIR_GEN_CONFIG_2048 = 2048;
-    private static final String DEFAULT_ALGORITHM = "RSA";
-    private static final String DEFAULT_CIPHER_CONFIG_STR = "RSA/ECB/PKCS1Padding";
+    public static final int KEYPAIR_GEN_CONFIG_2048 = 2048;
+    public static final String DEFAULT_ALGORITHM = "RSA";
+    public static final String DEFAULT_CIPHER_CONFIG_STR = "RSA/ECB/PKCS1Padding";
 
     private String passCode = null;
     private String content = null;
@@ -30,6 +29,22 @@ public class SecurityHelper1 {
     private PrivateKey privateKey = null;
     private String algorithm = null;
     private String cipherConfigStr = null;
+
+    public PublicKey getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public PrivateKey getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setPrivateKey(PrivateKey privateKey) {
+        this.privateKey = privateKey;
+    }
 
     public String getCipherConfigStr() {
         return cipherConfigStr;
@@ -70,14 +85,27 @@ public class SecurityHelper1 {
     public void setContentEn(String contentEn) {
         this.contentEn = contentEn;
     }
-
+    private void initialize() {
+        this.passCode = PASSCODESHA2048;
+        this.algorithm = DEFAULT_ALGORITHM;
+        this.cipherConfigStr = DEFAULT_CIPHER_CONFIG_STR;
+    }
+    public SecurityHelper1() {
+        initialize();
+    }
+    public SecurityHelper1(String _content) {
+        initialize();
+        this.content = _content;
+    }
     public SecurityHelper1(String _content, String _passCode) {
-        passCode = _passCode == null || _passCode.length() == 0 ? PASSCODESHA2048 : _passCode;
-        content = _content == null || _content.length() == 0 ? "" : _content;
+        initialize();
+        this.passCode = _passCode == null || _passCode.length() == 0 ? PASSCODESHA2048 : _passCode;
+        this.content = _content == null || _content.length() == 0 ? "" : _content;
     }
 
     public SecurityHelper1(String _algorithm, String _cipherConfigStr, byte[] _publicKeyBytes,
             byte[] _privateKeyBytes) {
+        initialize();
         // V2 member variables
         algorithm = _algorithm == null || _algorithm.length() == 0 ? DEFAULT_ALGORITHM : _algorithm;
         cipherConfigStr = _cipherConfigStr == null || _cipherConfigStr.length() == 0 ? DEFAULT_CIPHER_CONFIG_STR
@@ -96,13 +124,14 @@ public class SecurityHelper1 {
      * @param cipherConfigStr RSA/ECB/PKCS1Padding
      * @return UTF8 encoded String
      */
-    public String codeEn(String inputStr) {
+    public byte[] codeEn(String inputStr) {
         KeyPair pair = null;
+        byte[] cipherText = null;
         // String cipherConfigStr = null;
         try {
             // (String args[]) throws Exception
             // Creating a Signature object
-            Signature sign = Signature.getInstance("SHA256withRSA");
+            // Signature sign = Signature.getInstance("SHA256withRSA");
 
             // // Creating KeyPair generator object
             // KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
@@ -139,38 +168,43 @@ public class SecurityHelper1 {
             cipher.update(input);
 
             // encrypting the data
-            byte[] cipherText = cipher.doFinal();
-            String outputStr = new String(cipherText, StandardCharsets.UTF_8);
-            System.out.println("Output Str: " + outputStr);
-            return outputStr;
+            cipherText = cipher.doFinal();
+            return cipherText;
         } catch (Exception e) {
             e.printStackTrace();
-            return e.getMessage();
+            return cipherText;
         }
     }
 
-    public String codeDe(String inputUTF8EncryptedStr) {
+    /**
+     * 
+     * Inputs:
+     * algorithm, privateKey object
+     * @param inputUTF8EncryptedStr
+     * @return
+     */
+    public String codeDe(byte[] inputEncryptedBytes) {
+        final String METHOD_NAME = ":codeDe:";
         String outputStr = null;
         try {
             // Generate the pair of keys
             // this.privateKey = deSerializePriKe(null);
-
-            cipherConfigStr = cipherConfigStr == null ? DEFAULT_CIPHER_CONFIG_STR : inputUTF8EncryptedStr;
+            System.out.println(METHOD_NAME + "Milestone:3: inputEncryptedBytes: " + inputEncryptedBytes);
             // Creating a Cipher object
             Cipher cipher = Cipher.getInstance(cipherConfigStr);
 
             // Initializing the same cipher for decryption
             cipher.init(Cipher.DECRYPT_MODE, this.privateKey);
-            byte[] cipherText = null;
-            cipherText = inputUTF8EncryptedStr.getBytes(StandardCharsets.UTF_8);
             // Decrypting the text
-            byte[] decipheredText = cipher.doFinal(cipherText);
+            byte[] decipheredText = cipher.doFinal(inputEncryptedBytes);
 
             outputStr = new String(decipheredText, StandardCharsets.UTF_8);
-            System.out.println("outputStr: " + outputStr);
+            System.out.println(METHOD_NAME + "Milestone:5: outputStr: " + outputStr);
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println(METHOD_NAME + "Milestone:6: ERROR:e.message: " + e.getMessage());
         }
+        System.out.println(METHOD_NAME + "Milestone:7: Leaving");
         return outputStr;
     }
 
@@ -236,22 +270,18 @@ public class SecurityHelper1 {
         return keyPair;
     }
 
-    public PrivateKey deSerialize(String algorithm, byte[] privateKeyBytes, byte[] publicKeyBytes) {
-        PrivateKey privateKey = null;
-        // PublicKey publicKey = pair.getPublic();
-        // PrivateKey privateKey = pair.getPrivate();
-        // String publicKeyString =
-        // javax.xml.bind.DatatypeConverter.printBase64Binary(publicKey.getEncoded());
-        // String privateKeyString =
-        // javax.xml.bind.DatatypeConverter.printBase64Binary(privateKey.getEncoded());
-
+    public PrivateKey deSerialize(String _algorithm, byte[] privateKeyBytes, byte[] publicKeyBytes) {
+        this.algorithm = _algorithm == null && this.algorithm != null ? this.algorithm : _algorithm;
+        if(privateKeyBytes == null) return null;
+        if(publicKeyBytes == null) return null;
+        if(this.algorithm == null) return null;
         try {
-            KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
+            KeyFactory keyFactory = KeyFactory.getInstance(this.algorithm);
             EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
-            privateKey = keyFactory.generatePrivate(privateKeySpec);
+            this.privateKey = keyFactory.generatePrivate(privateKeySpec);
             if (publicKeyBytes != null) {
                 EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-                PublicKey publicKey2 = keyFactory.generatePublic(publicKeySpec);
+                this.publicKey = keyFactory.generatePublic(publicKeySpec);
             }
             // // The orginal and new keys are the same
             // boolean same = privateKey.equals(privateKey2);
@@ -261,9 +291,9 @@ public class SecurityHelper1 {
             System.out.println("serialize:Error:" + e);
             e.printStackTrace();
             System.out.println("==================================");
-            privateKey = null;
+            this.privateKey = null;
         }
-        return privateKey;
+        return this.privateKey;
     }
 
     public PublicKey deSerializePubKe(byte[] publicKeyBytes) {
@@ -315,8 +345,8 @@ public class SecurityHelper1 {
             pair = keyPairGen.generateKeyPair();
 
             // Getting the public key from the key pair
-            // PublicKey publicKey = pair.getPublic();
-            // PrivateKey privateKey = pair.getPrivate();
+            this.publicKey = pair.getPublic();
+            this.privateKey = pair.getPrivate();
         } catch (Exception e) {
             System.out.println(METHOD_NAME + "ExceptionExceptionException");
             System.out.println(METHOD_NAME + "ExceptionExceptionException e:" + e.toString());

@@ -2,6 +2,7 @@ package knt.lib.generic1;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -119,7 +120,8 @@ public class TestSecurityHelper1 {
         }
     }
 
-    public void test_generateStoreKeys1() {
+    @Test
+    public void test_prepareKeyPair1() {
         // generateStoreKeys
         final String METHOD_NAME = "test_generateStoreKeys1:";
         String content = "TestInput";
@@ -127,14 +129,14 @@ public class TestSecurityHelper1 {
         System.out.println(
                 METHOD_NAME + "securityHelper1:testCodesEn:content: " + content + " # algorithm: " + algorithm);
         SecurityHelper1 securityHelper1 = new SecurityHelper1(content, null);
-        KeyPair keyPair = securityHelper1.generateStoreKeys(algorithm);
+        KeyPair keyPair = securityHelper1.prepareKeyPair(algorithm);
         byte[] privateKeyBytes;
         byte[] publicKeyBytes;
 
         try {
-            PublicKey publicKey = keyPair.getPublic();
+            PublicKey publicKey = securityHelper1.getPublicKey();
             // Creating a Cipher object
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher cipher = Cipher.getInstance(SecurityHelper1.DEFAULT_CIPHER_CONFIG_STR);
 
             // Initializing a Cipher object
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
@@ -156,20 +158,141 @@ public class TestSecurityHelper1 {
 
             // Decrypting the text
             byte[] decipheredText = cipher.doFinal(cipherText);
-            System.out.println(METHOD_NAME + "decipheredText: " + new String(decipheredText));
+            String outputText4Check = new String(decipheredText, StandardCharsets.UTF_8);
+            System.out.println(METHOD_NAME + "outputText4CheckoutputText4Check: " + outputText4Check);
+            System.out.println(METHOD_NAME + "securityHelper1.getContent(): " + securityHelper1.getContent());
+            assertTrue(outputText4Check.equals(securityHelper1.getContent()));
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    public void testSecurityHelper1() {
-        String _algorithm = "RSA";
-        String _cipherConfigStr;
-        // byte[] _publicKeyBytes,
-        // byte[] _privateKeyBytes
-        SecurityHelper1 securityHelper1 = SecurityHelper1(String _algorithm, String _cipherConfigStr, byte[] _publicKeyBytes,
-        byte[] _privateKeyBytes);
+    @Test
+    public void test_codeEn() {
+        // generateStoreKeys
+        final String METHOD_NAME = "test_codeEn:";
+        String content = "TestInput";
+        String algorithm = "RSA";
+        System.out.println(
+                METHOD_NAME + "securityHelper1:testCodesEn:content: " + content + " # algorithm: " + algorithm);
+        SecurityHelper1 securityHelper1 = new SecurityHelper1(content, null);
+        KeyPair keyPair = securityHelper1.prepareKeyPair(algorithm);
+        byte[] privateKeyBytes;
+        try {
+            // encrypting the data
+            String cipherText = securityHelper1.codeEn(content);
+            System.out.println(METHOD_NAME + "cipherText: " + cipherText);
+
+            privateKeyBytes = keyPair.getPrivate().getEncoded();
+            PrivateKey privateKey = securityHelper1.deSerialize(algorithm, privateKeyBytes, null);
+
+            // Creating a Cipher object
+            Cipher cipher = Cipher.getInstance(SecurityHelper1.DEFAULT_CIPHER_CONFIG_STR);
+            cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            // Initializing the same cipher for decryption
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            byte[] cipherTextBytes = cipherText.getBytes(StandardCharsets.UTF_8);
+            // Decrypting the textsdfadsfdsafadsf
+            byte[] decipheredText = cipher.doFinal(cipherTextBytes);
+            String outputText4Check = new String(decipheredText, StandardCharsets.UTF_8);
+            System.out.println(METHOD_NAME + "outputText4CheckoutputText4Check: " + outputText4Check);
+            System.out.println(METHOD_NAME + "securityHelper1.getContent(): " + securityHelper1.getContent());
+            assertTrue(outputText4Check.equals(securityHelper1.getContent()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
+    @Test
+    public void test_codeEn_bytes2Str() {
+        // generateStoreKeys
+        final String METHOD_NAME = "test_codeEn:";
+        String content = "TestInput";
+        String algorithm = "RSA";
+        System.out.println(
+                METHOD_NAME + "securityHelper1:testCodesEn:content: " + content + " # algorithm: " + algorithm);
+        SecurityHelper1 securityHelper1 = new SecurityHelper1(content, null);
+        KeyPair keyPair = securityHelper1.prepareKeyPair(algorithm);
+        byte[] privateKeyBytes;
+        try {
+            // encrypting the data
+            byte[] cipherText = securityHelper1.codeEn(content);
+            System.out.println(METHOD_NAME + "cipherText: " + cipherText);
+
+            privateKeyBytes = keyPair.getPrivate().getEncoded();
+            PrivateKey privateKey = securityHelper1.deSerializePriKe(privateKeyBytes);
+
+            // Creating a Cipher object
+            Cipher cipher = Cipher.getInstance(SecurityHelper1.DEFAULT_CIPHER_CONFIG_STR);
+            // Initializing the same cipher for decryption
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            // Decrypting the text
+            byte[] decipheredText = cipher.doFinal(cipherText);
+            String outputText4Check = new String(decipheredText, "UTF8");
+            System.out.println(METHOD_NAME + "outputText4CheckoutputText4Check: " + outputText4Check);
+            System.out.println(METHOD_NAME + "securityHelper1.getContent(): " + securityHelper1.getContent());
+            assertTrue(outputText4Check.equals(securityHelper1.getContent()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+    @Test
+    public void test_CodeDe1() {
+        // generateStoreKeys
+        final String METHOD_NAME = "test_generateStoreKeys1:";
+        String content = "TestInput";
+        String algorithm = "RSA";
+        SecurityHelper1 securityHelper1 = new SecurityHelper1(content);
+        KeyPair keyPair = securityHelper1.prepareKeyPair(SecurityHelper1.DEFAULT_ALGORITHM);
+        System.out.println(
+                METHOD_NAME + "securityHelper1:testCodesEn:content: " + content + " # algorithm: " + algorithm);
+        
+        
+        System.out.println(METHOD_NAME + "Milestone:1: keyPair prepared");
+        byte[] privateKeyBytes;
+        try {
+            PublicKey publicKey = securityHelper1.getPublicKey();
+            System.out.println(METHOD_NAME + "========================================== 1");
+            // Creating a Cipher object
+            Cipher cipher = Cipher.getInstance(SecurityHelper1.DEFAULT_CIPHER_CONFIG_STR);
+            System.out.println(METHOD_NAME + "========================================== 2");
+            // Initializing a Cipher object
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            System.out.println(METHOD_NAME + "========================================== 3");
+            // Add data to the cipher
+            byte[] input = securityHelper1.getContent().getBytes();
+            System.out.println(METHOD_NAME + "========================================== 4");
+            cipher.update(input);
+            System.out.println(METHOD_NAME + "========================================== 5");
+            // encrypting the data
+            byte[] cipherText = cipher.doFinal();
+            System.out.println(METHOD_NAME + "Milestone:2:cipherText: " + cipherText);
+
+            privateKeyBytes = keyPair.getPrivate().getEncoded();
+            PrivateKey privateKey = securityHelper1.deSerializePriKe(privateKeyBytes);
+            if(privateKey != null) {
+                String outputText4Check = securityHelper1.codeDe(cipherText);
+                System.out.println(METHOD_NAME + "outputText4CheckoutputText4Check: " + outputText4Check);
+                System.out.println(METHOD_NAME + "securityHelper1.getContent(): " + securityHelper1.getContent());
+                assertTrue(outputText4Check.equals(securityHelper1.getContent()));
+            } else {
+                assertTrue(false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    // public void testSecurityHelper1() {
+    //     String _algorithm = "RSA";
+    //     String _cipherConfigStr;
+    //     // byte[] _publicKeyBytes,
+    //     // byte[] _privateKeyBytes
+    //     SecurityHelper1 securityHelper1 = SecurityHelper1(String _algorithm, String _cipherConfigStr, byte[] _publicKeyBytes,
+    //     byte[] _privateKeyBytes);
+
+    // }
 }
