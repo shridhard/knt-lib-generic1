@@ -49,11 +49,11 @@ public class TestSecurityHelper1 {
         assertTrue(outputVar != null);
     }
 
-    public void testCodesEn() {
+    public void testCodesEnV1() {
         String content = "TestInput";
         System.out.println("securityHelper1:testCodesEn:content: " + content);
         SecurityHelper1 securityHelper1 = new SecurityHelper1(content, null);
-        securityHelper1.codesEn();
+        securityHelper1.codesEnV1();
         System.out.println("securityHelper1:testCodesEn:contentEn: " + securityHelper1.getContentEn());
         assertTrue(securityHelper1.getContentEn() != null);
         /*
@@ -63,72 +63,20 @@ public class TestSecurityHelper1 {
          */
     }
 
-    public void testCodesDe() {
+    public void testCodesDeV1() {
         String content = "TestInput";
         System.out.println("securityHelper1:testCodesEn:content: " + content);
         SecurityHelper1 securityHelper1 = new SecurityHelper1(content, null);
-        securityHelper1.codesEn();
+        securityHelper1.codesEnV1();
         System.out.println("securityHelper1:testCodesEn:contentEn: " + securityHelper1.getContentEn());
         securityHelper1.setContent(null);
-        securityHelper1.codesDe();
+        securityHelper1.codesDeV1();
         System.out.println("securityHelper1:testCodes:contentDe: " + securityHelper1.getContent());
         assertTrue(securityHelper1.getContent() != null);
 
     }
 
-    public String encrypt(String inputStr) {
-        try {
-            // (String args[]) throws Exception
-            // Creating a Signature object
-            Signature sign = Signature.getInstance("SHA256withRSA");
-
-            // Creating KeyPair generator object
-            KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
-
-            // Initializing the key pair generator
-            keyPairGen.initialize(2048);
-
-            // Generate the pair of keys
-            KeyPair pair = keyPairGen.generateKeyPair();
-
-            // Getting the public key from the key pair
-            // commented to test RSAPublicKey
-            // PublicKey publicKeyOri = pair.getPublic();
-
-            // Approach changes / TODOs:
-            // Create a KeyPair on first signin or use
-            // serialize and store it as key values for future use
-            // Each SMS is then encrypted and saved.
-            // While consumption and segregation use decrypt and use
-
-            // Logic source :
-            // https://stackoverflow.com/questions/21606428/serialize-and-deserialize-an-rsa-public-key
-            RSAPublicKey publicKey = (RSAPublicKey) pair.getPublic();
-            String serializedModulusStr = publicKey.getModulus().toString();
-            String serializedpubExpoStr = publicKey.getPublicExponent().toString();
-
-            // Creating a Cipher object
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-
-            // Initializing a Cipher object
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-
-            // Add data to the cipher
-            byte[] input = inputStr.getBytes();
-            cipher.update(input);
-
-            // encrypting the data
-            byte[] cipherText = cipher.doFinal();
-            String outputStr = new String(cipherText, "UTF8");
-            System.out.println("Output Str: " + outputStr);
-            return outputStr;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return e.getMessage();
-        }
-    }
-
-    public void testCodesEnDe() {
+    public void testCodesEnDe_ORIGINAL() {
         try {
             // (String args[]) throws Exception
             // Creating a Signature object
@@ -214,64 +162,14 @@ public class TestSecurityHelper1 {
         }
 
     }
-    // public void testEncryDecry() {
-    // String content = "TestInput";
-    // String decryptedStr;
-    // System.out.println("securityHelper1:testCodesEn:content: " + content);
-    // try {
-    // String passCode = "$W%Ld0os$3$Wdos3";// String key = "Bar12345Bar12345"; //
-    // 128 bit key
-    // String encryptedStr = encrypt(content, passCode);
-    // System.out.println("passCode: " + passCode + " # encryptedStr: " +
-    // encryptedStr);
-    // decryptedStr = decrypt(encryptedStr, passCode);
-    // System.out.println("decryptedStr: " + decryptedStr);
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-    //// System.out.println("securityHelper1:testCodes:contentDe: " +
-    // securityHelper1.getContent());
-    // assertTrue(decryptedStr != null);
-    //
-    // }
-    //
-    // public static String encrypt(String plainText,String key) throws Exception{
-    // String strData="";
-    //
-    // try {
-    //// String key = "Bar12345Bar12345"; // 128 bit key
-    // String initVector = "RandomInitVector"; // 16 bytes IV
-    // IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-    // System.out.println(iv.getIV());
-    // SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
-    // Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-    // cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
-    // byte[] ciphertext =
-    // cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
-    // strData = new String(ciphertext);
-    //
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // throw new Exception(e);
-    // }
-    // return strData;
-    // }
-    // public static String decrypt(String strEncrypted,String strKey) throws
-    // Exception{
-    // String strData="";
-    //
-    // try {
-    // SecretKeySpec keySpec = new
-    // SecretKeySpec(strKey.getBytes(StandardCharsets.UTF_8), "AES");
-    // Cipher decoder = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-    // decoder.init(Cipher.DECRYPT_MODE, keyspec);
-    // byte[] decrypted = decoder.doFinal(message);
-    // strData = new String(decrypted);
-    //
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // throw new Exception(e);
-    // }
-    // return strData;
-    // }
+
+    public void testSecurityHelper1() {
+        String _algorithm = "RSA";
+        String _cipherConfigStr;
+        // byte[] _publicKeyBytes,
+        // byte[] _privateKeyBytes
+        SecurityHelper1 securityHelper1 = SecurityHelper1(String _algorithm, String _cipherConfigStr, byte[] _publicKeyBytes,
+        byte[] _privateKeyBytes);
+
+    }
 }
