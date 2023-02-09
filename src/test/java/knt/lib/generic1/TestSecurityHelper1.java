@@ -1,14 +1,13 @@
 package knt.lib.generic1;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
-import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 
 import javax.crypto.Cipher;
@@ -77,11 +76,13 @@ public class TestSecurityHelper1 {
 
     }
 
-    public void testCodesEnDe_ORIGINAL() {
+    @Test
+    public void testCodesEnDeORIGINAL() {
         try {
+            String content = "Welcome to EncryptDecrypt";
             // (String args[]) throws Exception
             // Creating a Signature object
-            Signature sign = Signature.getInstance("SHA256withRSA");
+            // Signature sign = Signature.getInstance("SHA256withRSA");
 
             // Creating KeyPair generator object
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
@@ -102,7 +103,7 @@ public class TestSecurityHelper1 {
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
             // Add data to the cipher
-            byte[] input = "Welcome to Tutorialspoint".getBytes();
+            byte[] input = content.getBytes();
             cipher.update(input);
 
             // encrypting the data
@@ -114,7 +115,9 @@ public class TestSecurityHelper1 {
 
             // Decrypting the text
             byte[] decipheredText = cipher.doFinal(cipherText);
-            System.out.println(new String(decipheredText));
+            String decipheredTextStr = new String(decipheredText, "UTF8");
+            System.out.println(decipheredTextStr);
+            assertEquals(content, decipheredTextStr);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -150,82 +153,12 @@ public class TestSecurityHelper1 {
             System.out.println(METHOD_NAME + "cipherText: " + new String(cipherText, "UTF8"));
 
             privateKeyBytes = keyPair.getPrivate().getEncoded();
-            PrivateKey privateKey = securityHelper1.deSerialize(algorithm, privateKeyBytes, null);
-
-            cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-            // Initializing the same cipher for decryption
-            cipher.init(Cipher.DECRYPT_MODE, privateKey);
-
-            // Decrypting the text
-            byte[] decipheredText = cipher.doFinal(cipherText);
-            String outputText4Check = new String(decipheredText, StandardCharsets.UTF_8);
-            System.out.println(METHOD_NAME + "outputText4CheckoutputText4Check: " + outputText4Check);
-            System.out.println(METHOD_NAME + "securityHelper1.getContent(): " + securityHelper1.getContent());
-            assertTrue(outputText4Check.equals(securityHelper1.getContent()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @Test
-    public void test_codeEn() {
-        // generateStoreKeys
-        final String METHOD_NAME = "test_codeEn:";
-        String content = "TestInput";
-        String algorithm = "RSA";
-        System.out.println(
-                METHOD_NAME + "securityHelper1:testCodesEn:content: " + content + " # algorithm: " + algorithm);
-        SecurityHelper1 securityHelper1 = new SecurityHelper1(content, null);
-        KeyPair keyPair = securityHelper1.prepareKeyPair(algorithm);
-        byte[] privateKeyBytes;
-        try {
-            // encrypting the data
-            byte[] cipherText = securityHelper1.codeEn(content);
-            System.out.println(METHOD_NAME + "cipherText: " + new String(cipherText, "UTF8"));
-
-            privateKeyBytes = keyPair.getPrivate().getEncoded();
-            PrivateKey privateKey = securityHelper1.deSerialize(algorithm, privateKeyBytes, null);
-
-            // Creating a Cipher object
-            Cipher cipher = Cipher.getInstance(SecurityHelper1.DEFAULT_CIPHER_CONFIG_STR);
-            cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-            // Initializing the same cipher for decryption
-            cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            // Decrypting the textsdfadsfdsafadsf
-            byte[] decipheredText = cipher.doFinal(cipherText);
-            String outputText4Check = new String(decipheredText, StandardCharsets.UTF_8);
-            System.out.println(METHOD_NAME + "outputText4CheckoutputText4Check: " + outputText4Check);
-            System.out.println(METHOD_NAME + "securityHelper1.getContent(): " + securityHelper1.getContent());
-            assertTrue(outputText4Check.equals(securityHelper1.getContent()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-    @Test
-    public void test_codeEn_bytes2Str() {
-        // generateStoreKeys
-        final String METHOD_NAME = "test_codeEn:";
-        String content = "TestInput";
-        String algorithm = "RSA";
-        System.out.println(
-                METHOD_NAME + "securityHelper1:testCodesEn:content: " + content + " # algorithm: " + algorithm);
-        SecurityHelper1 securityHelper1 = new SecurityHelper1(content, null);
-        KeyPair keyPair = securityHelper1.prepareKeyPair(algorithm);
-        byte[] privateKeyBytes;
-        try {
-            // encrypting the data
-            byte[] cipherText = securityHelper1.codeEn(content);
-            System.out.println(METHOD_NAME + "cipherText: " + cipherText);
-
-            privateKeyBytes = keyPair.getPrivate().getEncoded();
             PrivateKey privateKey = securityHelper1.deSerializePriKe(privateKeyBytes);
 
-            // Creating a Cipher object
-            Cipher cipher = Cipher.getInstance(SecurityHelper1.DEFAULT_CIPHER_CONFIG_STR);
+            cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             // Initializing the same cipher for decryption
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
+
             // Decrypting the text
             byte[] decipheredText = cipher.doFinal(cipherText);
             String outputText4Check = new String(decipheredText, "UTF8");
@@ -237,18 +170,53 @@ public class TestSecurityHelper1 {
         }
 
     }
+
+    @Test
+    public void test_codeEn() {
+        final String METHOD_NAME = "test_codeEn:";
+        String content = "TestInput";
+        String algorithm = "RSA";
+        System.out.println(
+                METHOD_NAME + "securityHelper1:testCodesEn:content: " + content + " # algorithm: " + algorithm);
+        SecurityHelper1 securityHelper1 = new SecurityHelper1();
+        KeyPair keyPair = securityHelper1.prepareKeyPair(SecurityHelper1.DEFAULT_ALGORITHM);
+        byte[] privateKeyBytes;
+        try {
+            // encrypting the data
+            byte[] cipherText = securityHelper1.codeEn(content);
+            System.out.println(METHOD_NAME + "cipherText: " + new String(cipherText, "UTF8"));
+
+            // privateKeyBytes = keyPair.getPrivate().getEncoded();
+            // PrivateKey privateKey = securityHelper1.deSerializePriKe(privateKeyBytes);
+            PrivateKey privateKey = keyPair.getPrivate();
+
+            // Creating a Cipher object
+            Cipher cipher = Cipher.getInstance(SecurityHelper1.DEFAULT_CIPHER_CONFIG_STR);
+            // Initializing the same cipher for decryption
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            // Decrypting the text
+            byte[] decipheredText = cipher.doFinal(cipherText);
+            String outputText4Check = new String(decipheredText, "UTF8");
+            System.out.println(METHOD_NAME + "outputText4CheckoutputText4Check: " + outputText4Check);
+            System.out.println(METHOD_NAME + "securityHelper1.getContent(): " + securityHelper1.getContent());
+            assertEquals(outputText4Check, securityHelper1.getContent());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     @Test
     public void test_CodeDe1() {
         // generateStoreKeys
         final String METHOD_NAME = "test_generateStoreKeys1:";
-        String content = "TestInput";
+        String content = "TestInput2";
         String algorithm = "RSA";
         SecurityHelper1 securityHelper1 = new SecurityHelper1(content);
         KeyPair keyPair = securityHelper1.prepareKeyPair(SecurityHelper1.DEFAULT_ALGORITHM);
         System.out.println(
                 METHOD_NAME + "securityHelper1:testCodesEn:content: " + content + " # algorithm: " + algorithm);
-        
-        
+
         System.out.println(METHOD_NAME + "Milestone:1: keyPair prepared");
         byte[] privateKeyBytes;
         try {
@@ -271,11 +239,14 @@ public class TestSecurityHelper1 {
 
             privateKeyBytes = keyPair.getPrivate().getEncoded();
             PrivateKey privateKey = securityHelper1.deSerializePriKe(privateKeyBytes);
-            if(privateKey != null) {
-                String outputText4Check = securityHelper1.codeDe(cipherText);
-                System.out.println(METHOD_NAME + "outputText4CheckoutputText4Check: " + outputText4Check);
+            if (privateKey != null) {
+                byte[] outputBytes = securityHelper1.codeDe(cipherText);
+                String outputText4Check = new String(outputBytes, "UTF8");
+                System.out
+                        .println(METHOD_NAME + "outputText4CheckoutputText4CheckoutputText4CheckoutputText4Check: "
+                                + outputText4Check);
                 System.out.println(METHOD_NAME + "securityHelper1.getContent(): " + securityHelper1.getContent());
-                assertTrue(outputText4Check.equals(securityHelper1.getContent()));
+                assertEquals(outputText4Check, securityHelper1.getContent());
             } else {
                 assertTrue(false);
             }
@@ -285,13 +256,4 @@ public class TestSecurityHelper1 {
 
     }
 
-    // public void testSecurityHelper1() {
-    //     String _algorithm = "RSA";
-    //     String _cipherConfigStr;
-    //     // byte[] _publicKeyBytes,
-    //     // byte[] _privateKeyBytes
-    //     SecurityHelper1 securityHelper1 = SecurityHelper1(String _algorithm, String _cipherConfigStr, byte[] _publicKeyBytes,
-    //     byte[] _privateKeyBytes);
-
-    // }
 }

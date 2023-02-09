@@ -1,12 +1,10 @@
 package knt.lib.generic1;
 
-import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -85,18 +83,22 @@ public class SecurityHelper1 {
     public void setContentEn(String contentEn) {
         this.contentEn = contentEn;
     }
+
     private void initialize() {
         this.passCode = PASSCODESHA2048;
         this.algorithm = DEFAULT_ALGORITHM;
         this.cipherConfigStr = DEFAULT_CIPHER_CONFIG_STR;
     }
+
     public SecurityHelper1() {
         initialize();
     }
+
     public SecurityHelper1(String _content) {
         initialize();
         this.content = _content;
     }
+
     public SecurityHelper1(String _content, String _passCode) {
         initialize();
         this.passCode = _passCode == null || _passCode.length() == 0 ? PASSCODESHA2048 : _passCode;
@@ -125,26 +127,10 @@ public class SecurityHelper1 {
      * @return UTF8 encoded String
      */
     public byte[] codeEn(String inputStr) {
-        KeyPair pair = null;
         byte[] cipherText = null;
         // String cipherConfigStr = null;
         try {
-            // (String args[]) throws Exception
-            // Creating a Signature object
-            // Signature sign = Signature.getInstance("SHA256withRSA");
-
-            // // Creating KeyPair generator object
-            // KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
-            // // Initializing the key pair generator
-            // keyPairGen.initialize(2048);
-            // // Generate the pair of keys
-            // pair = keyPairGen.generateKeyPair();
-            // Getting the public key from the key pair
-            // commented to test RSAPublicKey
-            // PublicKey publicKeyOri = pair.getPublic();
             this.algorithm = this.algorithm == null ? DEFAULT_ALGORITHM : this.algorithm;
-            pair = prepareKeyPair(this.algorithm);
-
             // Approach changes / TODOs:
             // Create a KeyPair on first signin or use
             // serialize and store it as key values for future use
@@ -153,9 +139,6 @@ public class SecurityHelper1 {
 
             // Logic source :
             // https://stackoverflow.com/questions/21606428/serialize-and-deserialize-an-rsa-public-key
-            RSAPublicKey publicKey = (RSAPublicKey) pair.getPublic();
-
-            // Creating a Cipher object
 
             this.cipherConfigStr = this.cipherConfigStr == null ? DEFAULT_CIPHER_CONFIG_STR : this.cipherConfigStr;
             Cipher cipher = Cipher.getInstance(this.cipherConfigStr);
@@ -163,29 +146,30 @@ public class SecurityHelper1 {
             // Initializing a Cipher object
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
+            this.content = inputStr;
             // Add data to the cipher
             byte[] input = inputStr.getBytes();
             cipher.update(input);
 
             // encrypting the data
             cipherText = cipher.doFinal();
-            return cipherText;
         } catch (Exception e) {
             e.printStackTrace();
-            return cipherText;
         }
+        return cipherText;
     }
 
     /**
      * 
      * Inputs:
      * algorithm, privateKey object
+     * 
      * @param inputUTF8EncryptedStr
      * @return
      */
-    public String codeDe(byte[] inputEncryptedBytes) {
+    public byte[] codeDe(byte[] inputEncryptedBytes) {
         final String METHOD_NAME = ":codeDe:";
-        String outputStr = null;
+        byte[] decipheredText = null;
         try {
             // Generate the pair of keys
             // this.privateKey = deSerializePriKe(null);
@@ -196,16 +180,14 @@ public class SecurityHelper1 {
             // Initializing the same cipher for decryption
             cipher.init(Cipher.DECRYPT_MODE, this.privateKey);
             // Decrypting the text
-            byte[] decipheredText = cipher.doFinal(inputEncryptedBytes);
-
-            outputStr = new String(decipheredText, StandardCharsets.UTF_8);
-            System.out.println(METHOD_NAME + "Milestone:5: outputStr: " + outputStr);
+            decipheredText = cipher.doFinal(inputEncryptedBytes);
+            System.out.println(METHOD_NAME + "Milestone:5: decipheredText: " + decipheredText);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(METHOD_NAME + "Milestone:6: ERROR:e.message: " + e.getMessage());
         }
         System.out.println(METHOD_NAME + "Milestone:7: Leaving");
-        return outputStr;
+        return decipheredText;
     }
 
     /**
@@ -272,9 +254,12 @@ public class SecurityHelper1 {
 
     public PrivateKey deSerialize(String _algorithm, byte[] privateKeyBytes, byte[] publicKeyBytes) {
         this.algorithm = _algorithm == null && this.algorithm != null ? this.algorithm : _algorithm;
-        if(privateKeyBytes == null) return null;
-        if(publicKeyBytes == null) return null;
-        if(this.algorithm == null) return null;
+        if (privateKeyBytes == null)
+            return null;
+        if (publicKeyBytes == null)
+            return null;
+        if (this.algorithm == null)
+            return null;
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(this.algorithm);
             EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
@@ -322,7 +307,7 @@ public class SecurityHelper1 {
             EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
             this.privateKey = keyFactory.generatePrivate(privateKeySpec);
         } catch (Exception e) {
-            System.out.println("serialize:Error:" + e);
+            System.out.println("deSerialize:Error:" + e);
             e.printStackTrace();
             System.out.println("==================================");
         }
@@ -334,7 +319,7 @@ public class SecurityHelper1 {
         final String METHOD_NAME = "prepareKeyPair:";
         KeyPair pair = null;
         try {
-            algorithm = algorithm == null ? "RSA" : algorithm;
+            algorithm = algorithm == null ? DEFAULT_ALGORITHM : algorithm;
             // Creating KeyPair generator object
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(algorithm);
 
