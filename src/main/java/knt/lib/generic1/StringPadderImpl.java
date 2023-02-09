@@ -1,5 +1,8 @@
 package knt.lib.generic1;
 
+/**
+ * This class consists of implementation methods for String padding
+ */
 public class StringPadderImpl implements StringPadder {
 
     StringPadderImpl() {

@@ -6,7 +6,7 @@
 
   <groupId>tech.koolnano.generic1</groupId>
   <artifactId>knt-java-generic-lib1</artifactId>
-  <version>0.0.5</version>
+  <version>0.0.6</version>
 
   <name>knt-java-generic-lib1</name>
   <description>This library consists of generic classes for String, API, and different utilities classes for android, WebApps, and APIs</description>

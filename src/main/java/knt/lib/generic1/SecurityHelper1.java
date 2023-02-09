@@ -122,8 +122,8 @@ public class SecurityHelper1 {
      * codeEnV2 version 2 This method encrypts input string based on inputs
      * 
      * @param inputStr
-     * @param algorithm       RSA
-     * @param cipherConfigStr RSA/ECB/PKCS1Padding
+     * param algorithm       RSA
+     * param cipherConfigStr RSA/ECB/PKCS1Padding
      * @return UTF8 encoded String
      */
     public byte[] codeEn(String inputStr) {
@@ -164,7 +164,7 @@ public class SecurityHelper1 {
      * Inputs:
      * algorithm, privateKey object
      * 
-     * @param inputUTF8EncryptedStr
+     * @param inputEncryptedBytes
      * @return
      */
     public byte[] codeDe(byte[] inputEncryptedBytes) {
